@@ -1,5 +1,5 @@
-name: events
-description: A starting point for Dart libraries or applications.
+name: f_events
+description: Events library.
 version: 0.1.0
 homepage: https://github.com/shindakioku/events
 author: firstlast <shindakioku@gmail.com>

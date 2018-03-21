@@ -1,4 +1,4 @@
-# events
+# f_events
 
 A library for Dart developers.
 
@@ -10,10 +10,24 @@ Created from templates made available by Stagehand under a BSD-style
 A simple usage example:
 
     import 'package:events/events.dart';
+    
+    class Event {
+        void execute() {}
+    }
 
     main() {
-      var awesome = new Awesome();
+        event.register('event_name', new Event());
+        event.listen('event_name', (Event event) => print('...'));
+        
+        event.call('event_name');
     }
+    
+### Todo
+
+- [ ] Write examples
+- [ ] tests 100%
+- [ ] Make lazy loading
+- [ ] Make mechanism for automaticily calling events from property in listener
 
 ## Features and bugs
 
