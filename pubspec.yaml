@@ -1,0 +1,14 @@
+name: events
+description: A starting point for Dart libraries or applications.
+version: 0.0.1
+homepage: https://www.example.com
+author: firstlast <email@example.com>
+
+environment:
+  sdk: '>=1.20.1 <2.0.0'
+
+dependencies:
+  yaml: ^2.1.13
+
+dev_dependencies:
+  test: ^0.12.0
