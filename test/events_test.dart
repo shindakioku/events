@@ -1,5 +1,5 @@
-import 'package:events/events.dart';
-import 'package:events/src/event_exception.dart';
+import 'package:f_events/f_events.dart';
+import 'package:f_events/src/event_exception.dart';
 import 'events.dart';
 import 'listeners.dart';
 
