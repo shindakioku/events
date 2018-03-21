@@ -9,7 +9,7 @@ Created from templates made available by Stagehand under a BSD-style
 
 A simple usage example:
 
-    import 'package:events/events.dart';
+    import 'package:f_events/f_events.dart';
     
     class Event {
         void execute() {}
@@ -27,10 +27,10 @@ A simple usage example:
 - [ ] Write examples
 - [ ] tests 100%
 - [ ] Make lazy loading
-- [ ] Make mechanism for automaticily calling events from property in listener
+- [ ] Make mechanism for automatically calling events from property in listener
 
 ## Features and bugs
 
 Please file feature requests and bugs at the [issue tracker][tracker].
 
-[tracker]: http://example.com/issues/replaceme
+[tracker]: https://github.com/shindakioku/events/issues
