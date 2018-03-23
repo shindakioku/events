@@ -9,19 +9,22 @@ Created from templates made available by Stagehand under a BSD-style
 
 A simple usage example:
 
-    import 'package:f_events/f_events.dart';
+```dart
+import 'package:f_events/f_events.dart';
     
-    class Event {
-        void execute() {}
-    }
+class Event {
+  String data;
 
-    main() {
-        event.register('event_name', new Event());
-        event.listen('event_name', (Event event) => print('...'));
+  Event(this.data);
+}
+
+void main() {
+  event.register('event_name', new Event());
+  event.listen('event_name', (Event event) => print(event.data));
         
-        event.call('event_name');
-    }
-    
+  event.call('event_name', positionalArguments: ['String']);
+}
+```   
 ### Todo
 
 - [ ] Write examples
