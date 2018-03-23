@@ -2,6 +2,7 @@ import 'event_exception.dart';
 import 'utils.dart';
 
 import 'dart:async';
+import 'dart:mirrors';
 
 /// You can use it instead of new Event()
 final event = new _Event();
@@ -51,7 +52,7 @@ abstract class Event {
      * [duration] can be only with seconds.
      * If not is null, then your event will be called automatically once every N seconds that you set
      */
-  Event register(String name, Object event, {Duration duration: null});
+  Event register(Type event, {String name, Duration duration: null});
 
   /**
      * Register your listener.
@@ -73,6 +74,10 @@ abstract class Event {
 
   bool callCommon(String event,
       {List<dynamic> positionalArguments, Map<String, dynamic> namedArguments});
+
+  Event removeEvent({Type type, String name});
+
+  Event removeEvents();
 }
 
 class _Event implements Event {
@@ -90,6 +95,34 @@ class _Event implements Event {
     _async = false;
   }
 
+  Event removeEvents() {
+    _events = [];
+    _listeners = [];
+
+    return this;
+  }
+
+  Event removeEvent({Type type, String name}) {
+    if (null != type) {
+      try {
+        var event = _events.firstWhere((EventDTO e) => e.event == type);
+
+        _listeners.removeWhere((l) => l.event == event.name ?? event.event);
+
+        _events.remove(event);
+      } catch (e) {}
+    }
+
+    if (null != name) {
+      try {
+        _events.removeWhere((e) => e.name == name);
+        _listeners.removeWhere((l) => l.event == name);
+      } catch (e) {}
+    }
+
+    return this;
+  }
+
   Event asyncCall(bool v) {
     _async = v;
 
@@ -99,9 +132,9 @@ class _Event implements Event {
   Future<bool> load(List objects) async {
     objects.forEach((m) {
       // If name is null
-      var eventName = m['name'] ?? m['event'].runtimeType.toString();
+      var eventName = m['name'] ?? m['event'].toString();
 
-      register(eventName, m['event'], duration: m['duration']);
+      register(m['event'], name: eventName, duration: m['duration']);
 
       if (null != m['listeners']) {
         (m['listeners'] as List).forEach((l) => listen(eventName,
@@ -112,8 +145,8 @@ class _Event implements Event {
     return true;
   }
 
-  Event register(String name, Object event, {Duration duration: null}) {
-    _events.add(new EventDTO(name, event, duration));
+  register(Type event, {String name, Duration duration: null}) {
+    _events.add(new EventDTO(name ?? event.toString(), event, duration));
 
     return this;
   }
@@ -156,24 +189,29 @@ class _Event implements Event {
       throw new EventException(error.message);
     }
 
-    try {
-      Function.apply(e.event.execute, posArgs, symbolize(namedArgs));
-    } catch (error) {
-      throw new EventException('Event must have the `execute` method.');
+    var eventObject = null;
+
+    // If is Type of class
+    if (e.event is Type) {
+      eventObject = reflectClass(e.event)
+          .newInstance(new Symbol(''), posArgs ?? [], symbolize(namedArgs))
+          .reflectee;
+    } else {
+      eventObject = e.event;
     }
 
-    for (var lis in _listeners.where((l) => l.event == e.name)) {
-      try {
+    try {
+      for (var lis in _listeners.where((l) => l.event == e.name)) {
         if (null != lis.callback) {
-          lis.callback(e.event);
+          lis.callback(eventObject); // Add try
         }
 
         if (null != lis.listener) {
-          lis.listener.handle(e.event);
+          reflectClass(lis.listener).newInstance(new Symbol(''), [eventObject]);
         }
-      } catch (error) {
-        throw new EventException('Listener must have the `handler` method.');
       }
+    } catch (error) {
+      throw new EventException('Cannot create the object from ${e.name}');
     }
 
     if (null != e.duration) {
@@ -196,24 +234,29 @@ class _Event implements Event {
       throw new EventException(error.message);
     }
 
-    try {
-      Function.apply(e.event.execute, posArgs, symbolize(namedArgs));
-    } catch (error) {
-      throw new EventException('Event must have the `execute` method.');
+    var eventObject = null;
+
+    // If is Type of class
+    if (e.event is Type) {
+      eventObject = reflectClass(e.event)
+          .newInstance(new Symbol(''), posArgs ?? [], symbolize(namedArgs))
+          .reflectee;
+    } else {
+      eventObject = e.event;
     }
 
-    for (var lis in _listeners.where((l) => l.event == e.name)) {
-      try {
+    try {
+      for (var lis in _listeners.where((l) => l.event == e.name)) {
         if (null != lis.callback) {
-          lis.callback(e.event);
+          lis.callback(eventObject); // Add try
         }
 
         if (null != lis.listener) {
-          lis.listener.handle(e.event);
+          reflectClass(lis.listener).newInstance(new Symbol(''), [eventObject]);
         }
-      } catch (error) {
-        throw new EventException('Listener must have the `handle` method.');
       }
+    } catch (error) {
+      throw new EventException('Cannot create the object from ${e.name}');
     }
 
     if (null != e.duration) {
@@ -227,16 +270,20 @@ class _Event implements Event {
 
 class EventDTO {
   final String name;
-  final Object event;
+
+  /// [Type] or [Object]
+  dynamic event;
   final Duration duration;
 
-  const EventDTO(this.name, this.event, this.duration);
+  EventDTO(this.name, this.event, this.duration);
 }
 
 class ListenerDTO {
   final String event;
   final Function callback;
-  final Object listener;
 
-  const ListenerDTO(this.event, {this.callback, this.listener});
+  /// [Type] or [Object]
+  dynamic listener;
+
+  ListenerDTO(this.event, {this.callback, this.listener});
 }

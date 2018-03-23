@@ -5,7 +5,7 @@ class Event1 {
 class Event2 {
   int t;
 
-  void execute() {
+  Event2() {
     t = 2;
   }
 }
@@ -19,25 +19,26 @@ class Event3Exception {}
 class Event4 {
   String data;
 
-  void execute(String v) {
-    data = v;
-  }
+  Event4(this.data);
 }
 
 class Event5 {
   String data;
   int data1;
 
-  void execute(String v, int c) {
-    data = v;
-    data1 = c;
-  }
+  Event5(this.data, this.data1);
 }
 
 class Event6 {
   int number;
 
-  void execute(int someInt) {
-    number = someInt;
+  Event6(this.number);
+}
+
+class Event7 {
+  int a;
+
+  Event7({int number}) {
+    a = number;
   }
 }

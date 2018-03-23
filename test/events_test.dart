@@ -10,7 +10,7 @@ import 'dart:math';
 void main() {
   test('Try to load one event with name with exception', () {
     var list = [
-      {'event': new Event1(), 'name': 'event_1'}
+      {'event': Event1, 'name': 'event_1'}
     ];
 
     event.load(list);
@@ -22,14 +22,14 @@ void main() {
     }
   });
 
-  test('Try to load one event with name', () async {
+  test('Try to load one event with type name', () async {
     var list = [
-      {'event': new Event1(), 'name': 'event_1'}
+      {'event': Event1}
     ];
 
     await event.load(list);
 
-    event.call('event_1');
+    event.call('Event1');
   });
 
   test('Try to load one event with listener', () async {
@@ -37,7 +37,7 @@ void main() {
 
     var list = [
       {
-        'event': new Event1(),
+        'event': Event1,
         'name': 'event_1',
         'listeners': [
           {'callback': (Event1 event) => listenResult = 1}
@@ -57,7 +57,7 @@ void main() {
 
     var list = [
       {
-        'event': new Event1(),
+        'event': Event1,
         'name': 'event_1',
         'listeners': [
           {'callback': (Event1 event) => listenResult = 1},
@@ -78,7 +78,7 @@ void main() {
 
     var list = [
       {
-        'event': new Event2(),
+        'event': Event2,
         'name': 'event_2',
         'listeners': [
           {'callback': (Event2 event) => listenResult = event.t}
@@ -92,15 +92,35 @@ void main() {
     expect(listenResult, equals(2));
   });
 
-  test('Try to load one event with listener and property from event', () async {
-    var listener = new Listener1();
+  test('Try to load one event with listener and named property from event',
+      () async {
+    int listenResult = 0;
 
     var list = [
       {
-        'event': new Event2(),
+        'event': Event7,
+        'name': 'event_7',
+        'listeners': [
+          {'callback': (Event7 event) => listenResult = event.a}
+        ]
+      }
+    ];
+
+    await event.load(list);
+
+    event.call('event_7', namedArguments: {'number': 341});
+    expect(listenResult, equals(341));
+  });
+
+  test('Try to load one event with listener and property from event', () async {
+    var e = null;
+
+    var list = [
+      {
+        'event': Event2,
         'name': 'event_2',
         'listeners': [
-          {'listener': listener}
+          {'callback': (Event2 event) => e = event}
         ]
       }
     ];
@@ -108,17 +128,17 @@ void main() {
     await event.load(list);
 
     event.call('event_2');
-    expect(listener.t, equals(2));
+    expect(e.t, equals(2));
   });
 
   test('Register event and call without listener', () {
-    event.register('event_3', new Event3());
+    event.register(Event3);
 
-    event.call('event_3');
+    event.call('Event3');
   });
 
   test('Register event and call without listener with exception', () {
-    event.register('event_3_exception', new Event3Exception());
+    event.register(Event3Exception, name: 'event_3_exception');
 
     try {
       event.call('event_3_exception');
@@ -130,7 +150,7 @@ void main() {
   test('Register event, listener and set data to execute', () async {
     String eventData;
 
-    event.register('event_4', new Event4());
+    event.register(Event4, name: 'event_4');
     event.listen('event_4', callback: (Event4 event) => eventData = event.data);
 
     event.call('event_4', positionalArguments: ['Some string']);
@@ -141,7 +161,7 @@ void main() {
   test('Register event, listener and set data to execute with async', () async {
     String eventData;
 
-    event.register('event_4', new Event4());
+    event.register(Event4, name: 'event_4');
     event.listen('event_4', callback: (Event4 event) => eventData = event.data);
 
     event.asyncCall(true).call('event_4', positionalArguments: [
@@ -154,17 +174,16 @@ void main() {
   });
 
   test('Register event, listener and set data to execute', () async {
-    var listener = new Listener2();
+    var e = null;
 
-    event.register('event_5', new Event5());
-    event.listen('event_5', listener: listener);
+    event.register(Event5, name: 'event_5');
+    event.listen('event_5', callback: (Event5 event) => e = event);
 
     event
         .asyncCall(false)
         .call('event_5', positionalArguments: ['Some string 123qwe', 123]);
 
-    expect(listener.someString, equals('Some string 123qwe'));
-    expect(listener.someInt, equals(123));
+    expect(e.data, equals('Some string 123qwe'));
+    expect(e.data1, equals(123));
   });
-
 }
