@@ -1,6 +1,6 @@
 name: f_events
 description: A library for event handling in Dart.
-version: 0.2.0
+version: 1.0.0
 homepage: https://github.com/shindakioku/events
 author: firstlast <shindakioku@gmail.com>
 
